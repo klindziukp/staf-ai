@@ -1,0 +1,114 @@
+name: Petstore API Test Execution
+
+on:
+  push:
+    branches: [ main, develop, feature/** ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'regression'
+        type: choice
+        options:
+          - smoke
+          - regression
+          - all
+
+jobs:
+  test:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        java-version: [11, 17]
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: 'gradle'
+      
+      - name: Grant execute permission for gradlew
+        run: chmod +x petstore-api-automation/gradlew
+        
+      - name: Run Smoke Tests
+        if: github.event.inputs.test_suite == 'smoke' || github.event.inputs.test_suite == ''
+        working-directory: petstore-api-automation
+        run: ./gradlew smokeTests --info
+        continue-on-error: true
+      
+      - name: Run Regression Tests
+        if: github.event.inputs.test_suite == 'regression'
+        working-directory: petstore-api-automation
+        run: ./gradlew regressionTests --info
+        continue-on-error: true
+      
+      - name: Run All Tests
+        if: github.event.inputs.test_suite == 'all'
+        working-directory: petstore-api-automation
+        run: ./gradlew test --info
+        continue-on-error: true
+      
+      - name: Generate Allure Report
+        if: always()
+        working-directory: petstore-api-automation
+        run: ./gradlew allureReport
+      
+      - name: Upload Allure Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-java-${{ matrix.java-version }}
+          path: petstore-api-automation/build/allure-results
+          retention-days: 30
+      
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-java-${{ matrix.java-version }}
+          path: petstore-api-automation/build/reports/allure-report
+          retention-days: 30
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-java-${{ matrix.java-version }}
+          path: petstore-api-automation/build/test-results
+          retention-days: 30
+      
+      - name: Publish Test Report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Test Results (Java ${{ matrix.java-version }})
+          path: petstore-api-automation/build/test-results/**/*.xml
+          reporter: java-junit
+          fail-on-error: false
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    
+    steps:
+      - name: Test Summary
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Test suite execution completed" >> $GITHUB_STEP_SUMMARY
+          echo "Check artifacts for detailed reports" >> $GITHUB_STEP_SUMMARY
