@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Petstore API Test Suite" parallel="classes" thread-count="3">
+    <test name="Petstore API Tests">
+        <classes>
+            <class name="com.klindziuk.petstore.tests.GetPetsTest"/>
+            <class name="com.klindziuk.petstore.tests.CreatePetTest"/>
+            <class name="com.klindziuk.petstore.tests.GetPetByIdTest"/>
+        </classes>
+    </test>
+</suite>
