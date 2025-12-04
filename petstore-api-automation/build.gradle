@@ -1,0 +1,102 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+group = 'com.petstore.automation'
+version = '1.0.0'
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+ext {
+    restAssuredVersion = '5.3.2'
+    testngVersion = '7.8.0'
+    allureVersion = '2.24.0'
+    jacksonVersion = '2.15.3'
+    lombokVersion = '1.18.30'
+    slf4jVersion = '2.0.9'
+    log4jVersion = '2.21.1'
+    assertjVersion = '3.24.2'
+    jsonSchemaValidatorVersion = '5.4.0'
+}
+
+dependencies {
+    // REST Assured
+    implementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    implementation "io.rest-assured:json-path:${restAssuredVersion}"
+    implementation "io.rest-assured:json-schema-validator:${jsonSchemaValidatorVersion}"
+    
+    // Jackson
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    
+    // Logging
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-slf4j2-impl:${log4jVersion}"
+    
+    // TestNG
+    testImplementation "org.testng:testng:${testngVersion}"
+    
+    // Allure
+    testImplementation "io.qameta.allure:allure-testng:${allureVersion}"
+    testImplementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
+    
+    // Assertions
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+        parallel = 'methods'
+        threadCount = 3
+    }
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+    
+    systemProperties = System.properties as Map<String, ?>
+    
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+}
+
+allure {
+    version = allureVersion
+    autoconfigure = true
+    aspectjweaver = true
+    
+    useTestNG {
+        version = allureVersion
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+task cleanAllure(type: Delete) {
+    delete 'allure-results'
+}
+
+clean.dependsOn cleanAllure
