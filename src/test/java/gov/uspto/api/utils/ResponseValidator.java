@@ -1,6 +1,7 @@
 package gov.uspto.api.utils;
 
 import io.qameta.allure.Step;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -148,7 +149,7 @@ public class ResponseValidator {
     public static void validateErrorMessage(Response response) {
         response.then()
                 .body("error", notNullValue())
-                .or()
+                .noRoot()
                 .body("message", notNullValue());
         log.info("Response contains error message");
     }

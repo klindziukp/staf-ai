@@ -31,8 +31,8 @@ dependencies {
     testImplementation 'org.testng:testng:7.10.2'
     
     // Allure
-    testImplementation 'io.qameta.allure:allure-testng:2.29.0'
-    testImplementation 'io.qameta.allure:allure-rest-assured:2.29.0'
+    implementation 'io.qameta.allure:allure-testng:2.29.0'
+    implementation 'io.qameta.allure:allure-rest-assured:2.29.0'
     
     // Assertions
     testImplementation 'org.assertj:assertj-core:3.26.3'
@@ -79,12 +79,6 @@ test {
 
 allure {
     version = '2.29.0'
-}
-
-tasks.register('wrapper', Wrapper) {
-    gradleVersion = '8.11.1'
-    distributionType = Wrapper.DistributionType.BIN
-    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
 }
 
 tasks.register('cleanAllure', Delete) {

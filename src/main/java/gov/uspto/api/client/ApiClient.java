@@ -45,7 +45,7 @@ public class ApiClient {
                     .setContentType(ContentType.JSON)
                     .setAccept(ContentType.JSON)
                     .addFilter(new AllureRestAssured())
-                    .log(config.isLoggingEnabled() ? LogDetail.ALL : LogDetail.NONE)
+                    .log(config.isLoggingEnabled() ? LogDetail.ALL : LogDetail.METHOD)
                     .build();
         }
         return requestSpec;
