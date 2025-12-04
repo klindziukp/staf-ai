@@ -1,0 +1,117 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.12.0'
+}
+
+group = 'com.tictactoe.api'
+version = project.projectVersion
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // REST Assured
+    implementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    implementation "io.rest-assured:json-path:${restAssuredVersion}"
+    implementation "io.rest-assured:json-schema-validator:${restAssuredVersion}"
+    
+    // Jackson
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    
+    // Logging
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j2-impl:${log4jVersion}"
+    testImplementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+    
+    // TestNG
+    testImplementation "org.testng:testng:${testngVersion}"
+    
+    // Allure
+    testImplementation "io.qameta.allure:allure-testng:${allureVersion}"
+    testImplementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
+    
+    // Assertions
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "net.javacrumbs.json-unit:json-unit:${jsonUnitVersion}"
+    testImplementation "net.javacrumbs.json-unit:json-unit-assertj:${jsonUnitVersion}"
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+        parallel = 'methods'
+        threadCount = 4
+    }
+    
+    systemProperty 'env', System.getProperty('env', 'dev')
+    systemProperty 'allure.results.directory', "${buildDir}/allure-results"
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+    
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+}
+
+allure {
+    version = allureVersion
+    autoconfigure = true
+    aspectjweaver = true
+    resultsDir = file("${buildDir}/allure-results")
+    reportDir = file("${buildDir}/allure-report")
+}
+
+tasks.register('cleanAllure', Delete) {
+    delete allure.resultsDir, allure.reportDir
+}
+
+clean.dependsOn cleanAllure
+
+tasks.register('allureReport') {
+    dependsOn test
+    doLast {
+        exec {
+            commandLine 'allure', 'generate', allure.resultsDir, '-o', allure.reportDir, '--clean'
+        }
+    }
+}
+
+tasks.register('allureServe') {
+    dependsOn test
+    doLast {
+        exec {
+            commandLine 'allure', 'serve', allure.resultsDir
+        }
+    }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
