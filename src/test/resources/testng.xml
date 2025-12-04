@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Tic Tac Toe API Test Suite" parallel="methods" thread-count="4" verbose="1">
+    <test name="Board Tests">
+        <classes>
+            <class name="com.tictactoe.api.tests.board.GetBoardTests"/>
+        </classes>
+    </test>
+
+    <test name="Square Tests">
+        <classes>
+            <class name="com.tictactoe.api.tests.square.GetSquareTests"/>
+            <class name="com.tictactoe.api.tests.square.PlaceMarkTests"/>
+        </classes>
+    </test>
+
+    <test name="Game Logic Tests">
+        <classes>
+            <class name="com.tictactoe.api.tests.gamelogic.WinConditionTests"/>
+        </classes>
+    </test>
+
+    <test name="Security Tests">
+        <classes>
+            <class name="com.tictactoe.api.tests.security.AuthenticationTests"/>
+        </classes>
+    </test>
+</suite>
