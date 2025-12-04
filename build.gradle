@@ -1,0 +1,122 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+group = 'com.tictactoe.api'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+ext {
+    restAssuredVersion = '5.3.0'
+    testngVersion = '7.11.0'
+    allureVersion = '2.29.1'
+    log4jVersion = '3.0.0-beta2'
+    slf4jVersion = '2.0.16'
+    lombokVersion = '1.18.34'
+    jacksonVersion = '2.18.2'
+    assertjVersion = '3.27.3'
+    jsonUnitVersion = '4.1.0'
+}
+
+dependencies {
+    // REST Assured
+    implementation("io.rest-assured:rest-assured:${restAssuredVersion}")
+    implementation("io.rest-assured:json-path:${restAssuredVersion}")
+    implementation("io.rest-assured:json-schema-validator:${restAssuredVersion}")
+    
+    // Jackson for JSON processing
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
+    
+    // Lombok
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+    testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+    testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+    
+    // Logging
+    implementation("org.slf4j:slf4j-api:${slf4jVersion}")
+    implementation("org.apache.logging.log4j:log4j-api:${log4jVersion}")
+    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:${log4jVersion}")
+    testImplementation("org.apache.logging.log4j:log4j-core:${log4jVersion}")
+    
+    // TestNG
+    testImplementation("org.testng:testng:${testngVersion}")
+    
+    // Allure
+    testImplementation("io.qameta.allure:allure-testng:${allureVersion}")
+    testImplementation("io.qameta.allure:allure-rest-assured:${allureVersion}")
+    
+    // Assertions
+    testImplementation("org.assertj:assertj-core:${assertjVersion}")
+    testImplementation("net.javacrumbs.json-unit:json-unit:${jsonUnitVersion}")
+    testImplementation("net.javacrumbs.json-unit:json-unit-assertj:${jsonUnitVersion}")
+    
+    // Apache Commons
+    implementation("org.apache.commons:commons-lang3:3.17.0")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+        parallel = 'methods'
+        threadCount = 3
+        useDefaultListeners = true
+    }
+    
+    systemProperty 'environment', System.getProperty('environment', 'dev')
+    systemProperty 'allure.results.directory', "${buildDir}/allure-results"
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+    
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+}
+
+allure {
+    version = allureVersion
+    autoconfigure = true
+    aspectjweaver = true
+    
+    resultsDir = file("${buildDir}/allure-results")
+    reportDir = file("${buildDir}/allure-report")
+}
+
+task smokeTests(type: Test) {
+    useTestNG() {
+        suites 'src/test/resources/testng-smoke.xml'
+    }
+}
+
+task regressionTests(type: Test) {
+    useTestNG() {
+        suites 'src/test/resources/testng-regression.xml'
+    }
+}
+
+task securityTests(type: Test) {
+    useTestNG() {
+        suites 'src/test/resources/testng-security.xml'
+    }
+}
