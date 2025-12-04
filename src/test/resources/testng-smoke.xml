@@ -1,0 +1,24 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Smoke Test Suite" parallel="methods" thread-count="2" verbose="1">
+    <test name="Smoke Tests">
+        <classes>
+            <class name="com.tictactoe.api.tests.board.GetBoardTests">
+                <methods>
+                    <include name="testGetEmptyBoard"/>
+                    <include name="testGetBoardWithApiKey"/>
+                </methods>
+            </class>
+            <class name="com.tictactoe.api.tests.board.GetSquareTests">
+                <methods>
+                    <include name="testGetEmptySquare"/>
+                </methods>
+            </class>
+            <class name="com.tictactoe.api.tests.board.PutSquareTests">
+                <methods>
+                    <include name="testPlaceXOnEmptySquare"/>
+                    <include name="testPlaceOOnEmptySquare"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
