@@ -1,0 +1,122 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+group = 'gov.uspto.api'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+dependencies {
+    // REST Assured
+    implementation 'io.rest-assured:rest-assured:5.5.0'
+    implementation 'io.rest-assured:json-path:5.5.0'
+    implementation 'io.rest-assured:json-schema-validator:5.5.0'
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
+    
+    // TestNG
+    testImplementation 'org.testng:testng:7.10.2'
+    
+    // Allure
+    testImplementation 'io.qameta.allure:allure-testng:2.29.0'
+    testImplementation 'io.qameta.allure:allure-rest-assured:2.29.0'
+    
+    // Assertions
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+    testImplementation 'org.hamcrest:hamcrest:3.0'
+    
+    // JSON Processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.1'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+    
+    // Apache Commons
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'commons-io:commons-io:2.17.0'
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+        parallel = 'methods'
+        threadCount = 3
+        preserveOrder = true
+    }
+    
+    systemProperty 'env', System.getProperty('env', 'dev')
+    systemProperty 'allure.results.directory', 'build/allure-results'
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+    
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+}
+
+allure {
+    version = '2.29.0'
+}
+
+tasks.register('wrapper', Wrapper) {
+    gradleVersion = '8.11.1'
+    distributionType = Wrapper.DistributionType.BIN
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip"
+}
+
+tasks.register('cleanAllure', Delete) {
+    delete 'build/allure-results'
+}
+
+clean.dependsOn cleanAllure
+
+tasks.register('generateAllureReport') {
+    dependsOn test
+    doLast {
+        exec {
+            commandLine 'allure', 'generate', 'build/allure-results', '-o', 'build/allure-report', '--clean'
+        }
+    }
+}
+
+tasks.register('openAllureReport') {
+    dependsOn generateAllureReport
+    doLast {
+        exec {
+            commandLine 'allure', 'open', 'build/allure-report'
+        }
+    }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
