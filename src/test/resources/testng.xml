@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="USPTO API Test Suite" parallel="methods" thread-count="3" verbose="1">
+    <test name="Dataset API Tests">
+        <classes>
+            <class name="gov.uspto.api.tests.DataSetTests"/>
+        </classes>
+    </test>
+    
+    <test name="Fields API Tests">
+        <classes>
+            <class name="gov.uspto.api.tests.FieldsTests"/>
+        </classes>
+    </test>
+    
+    <test name="Records API Tests">
+        <classes>
+            <class name="gov.uspto.api.tests.RecordsTests"/>
+        </classes>
+    </test>
+</suite>
