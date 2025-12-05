@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Tic Tac Toe API Test Suite" parallel="false" verbose="1">
+    <test name="Apache HTTP Tests" preserve-order="true">
+        <classes>
+            <class name="com.tictactoe.test.test.apachehttp.TicTacToeApacheHttpTest"/>
+        </classes>
+    </test>
+    
+    <test name="RestAssured Tests" preserve-order="true">
+        <classes>
+            <class name="com.tictactoe.test.test.restassured.TicTacToeRestAssuredTest"/>
+        </classes>
+    </test>
+    
+    <test name="Retrofit Tests" preserve-order="true">
+        <classes>
+            <class name="com.tictactoe.test.test.retrofit.TicTacToeRetrofitTest"/>
+        </classes>
+    </test>
+</suite>
