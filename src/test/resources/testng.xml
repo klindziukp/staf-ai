@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="USPTO Data Set API Test Suite" parallel="false" verbose="1">
+    
+    <listeners>
+        <listener class-name="com.klindziuk.staf.listener.TestSuiteListener"/>
+        <listener class-name="com.klindziuk.staf.listener.TestMethodCaptureListener"/>
+    </listeners>
+
+    <test name="USPTO Metadata API Tests" preserve-order="true">
+        <classes>
+            <class name="com.klindziuk.staf.test.UsptoDataSetApiTest"/>
+        </classes>
+    </test>
+
+    <test name="USPTO Search API Tests" preserve-order="true">
+        <classes>
+            <class name="com.klindziuk.staf.test.UsptoSearchApiTest"/>
+        </classes>
+    </test>
+
+</suite>
