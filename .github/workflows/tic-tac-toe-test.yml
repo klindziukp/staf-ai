@@ -1,0 +1,67 @@
+name: Tic Tac Toe API Test
+
+on:
+  push:
+    branches:
+      - tic-tac-toe-api-test-framework
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Set up JDK 11 for x64
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          architecture: x64
+          
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+            
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: tic-tac-toe-api-test
+        
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+        working-directory: tic-tac-toe-api-test
+        
+      - name: Run Tic Tac Toe API Tests
+        run: ./gradlew executeTicTacToeTest
+        working-directory: tic-tac-toe-api-test
+        continue-on-error: true
+        
+      - name: Generate Allure Report
+        if: always()
+        run: ./gradlew allureReport
+        working-directory: tic-tac-toe-api-test
+        
+      - name: Upload Allure Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path: tic-tac-toe-api-test/build/allure-results
+          
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: tic-tac-toe-api-test/build/reports/tests
