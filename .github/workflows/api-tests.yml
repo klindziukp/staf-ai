@@ -1,0 +1,75 @@
+name: USPTO API Test Automation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - 'build.gradle.kts'
+      - '.github/workflows/api-tests.yml'
+
+jobs:
+  api-tests:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+          
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        
+      - name: Build project
+        run: ./gradlew clean build -x test
+        
+      - name: Run API Tests
+        run: ./gradlew test --info
+        continue-on-error: true
+        
+      - name: Generate Test Report
+        if: always()
+        run: |
+          echo "Test execution completed"
+          if [ -d "build/reports/tests/test" ]; then
+            echo "Test reports generated successfully"
+          fi
+          
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests/test/
+            build/test-results/test/
+            target/test-logs/
+          retention-days: 30
+          
+      - name: Upload Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: target/test-logs/
+          retention-days: 30
+          
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "build/test-results/test/TEST-*.xml" ]; then
+            echo "✅ Test results available in artifacts" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No test results found" >> $GITHUB_STEP_SUMMARY
+          fi
