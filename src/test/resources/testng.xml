@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<suite name="USPTO Data Set API Test Suite" parallel="methods" thread-count="5" verbose="1">
+    
+    <parameter name="baseUrl" value="https://developer.uspto.gov/ds-api"/>
+    <parameter name="environment" value="QA"/>
+    
+    <listeners>
+        <listener class-name="com.uspto.api.listeners.TestSuiteListener"/>
+        <listener class-name="com.uspto.api.listeners.TestMethodListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="USPTO API - Smoke Tests" preserve-order="true">
+        <classes>
+            <class name="com.uspto.api.tests.smoke.ListDataSetsTest"/>
+        </classes>
+    </test>
+
+    <test name="USPTO API - List Fields Tests" preserve-order="true">
+        <classes>
+            <class name="com.uspto.api.tests.functional.ListFieldsTest"/>
+        </classes>
+    </test>
+
+    <test name="USPTO API - Search Records Tests" parallel="methods" thread-count="3">
+        <classes>
+            <class name="com.uspto.api.tests.functional.SearchRecordsTest"/>
+        </classes>
+    </test>
+
+    <test name="USPTO API - Negative Tests">
+        <classes>
+            <class name="com.uspto.api.tests.negative.NegativeTestScenarios"/>
+        </classes>
+    </test>
+
+    <test name="USPTO API - Schema Validation Tests">
+        <classes>
+            <class name="com.uspto.api.tests.schema.SchemaValidationTest"/>
+        </classes>
+    </test>
+
+</suite>
