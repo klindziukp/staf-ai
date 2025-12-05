@@ -18,4 +18,10 @@
             <class name="com.tictactoe.test.test.retrofit.TicTacToeRetrofitTest"/>
         </classes>
     </test>
+    
+    <test name="Integration Tests" preserve-order="true">
+        <classes>
+            <class name="com.tictactoe.test.test.integration.TicTacToeIntegrationTest"/>
+        </classes>
+    </test>
 </suite>
